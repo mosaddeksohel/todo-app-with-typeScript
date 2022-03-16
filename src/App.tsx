@@ -1,25 +1,70 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useCallback, useReducer, useRef } from 'react';
 import './App.css';
+// import Lists from './component/Lists/Lists';
+
+/* 
+const Box: React.FC<{ title: string }> = ({ title }) => {
+  return <div></div>
+} */
+
+interface Todo {
+  id: number,
+  text: string
+}
+type ActionType = { type: "ADD"; text: string } | { type: "REMOVE"; id: number };
+
+
+
 
 function App() {
+  function reducer(state: Todo[], action: ActionType) {
+    switch (action.type) {
+      case "ADD":
+        return [
+          ...state,
+          {
+            id: state.length,
+            text: action.text
+          },
+        ]
+      case "REMOVE":
+        return state.filter(({ id }) => id !== action.id)
+    }
+  }
+
+
+  const [todos, dispatch] = useReducer(reducer, []);
+  const newToDoRef = useRef<HTMLInputElement>(null);
+
+  // use call back hook
+  const onAddToDo = useCallback(() => {
+    if (newToDoRef.current) {
+      dispatch({
+        type: "ADD",
+        text: newToDoRef.current.value
+      })
+      newToDoRef.current.value = "";
+    }
+  }, [])
+
+
   return (
+
+
+
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+      <input type="text" ref={newToDoRef} />
+      <button onClick={onAddToDo}>Add</button>
+      {
+        todos.map((todo) => (
+          < div key={todo.id} >
+            {todo.text}
+            <button onClick={() => dispatch({ type: "REMOVE", id: todo.id })}>Remove</button>
+          </div>
+        ))
+      }
+    </div >
   );
 }
 
